@@ -32,8 +32,6 @@ Part 2. In consideration of all the metrics we discussed what are a few key metr
 
 Part 3. Build a kNN model and evaluate the model using the metrics discussed in class (Accuracy, TPR, FPR, F1, Kappa, LogLoss and ROC/AUC). Make sure to calculate the baserate or prevalence to provide a reference for some of these measures. Even though you are generating many of the metrics we discussed, summarize the output of the key metrics you established in part 2. 
 
-
-
 Part 4.  Consider where miss-classification errors are occurring, is there a pattern? If so discuss this pattern and why you think this is the case. 
 
 
@@ -43,7 +41,7 @@ Part 6. Summarize your findings focusing speaking through your question, what do
 
 Recommendations for improvement might include gathering more data, adjusting the threshold, adding new features, changing your questions or maybe that it's working fine at the current level and nothing should be done. 
 
-Regardless of the outcome, what should we be aware of when your model is deployed (online versus offline)? 
+Regardless of the DEATH_EVENT, what should we be aware of when your model is deployed (online versus offline)? 
 
 Submit a .Rmd file along with the data used or access to the data sources to the Collab site. You can work together with your groups but submit individually. 
 
@@ -53,35 +51,6 @@ author: "Brian Wright"
 date: "10/25/2020"
 output: html_document
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-```
-
-Throughout your early career as a data scientist you've built article summaries, 
-explored NBA talent, minded text on climate change news but you've suddenly realized you need to enhance your ability to assess the models you are building. 
-As the most important part about understanding any machine learning model 
-(or any model, really) is understanding it's weakness and or vulnerabilities. 
-
-In doing so you've decided to practice on a dataset that are of interest to you, and use a approach to which you are familiar, kNN. 
-
-Part 1. Select either as a lab group or as individuals a dataset that is of interest to you/group. Define a question that can be answered using classification, specifically kNN, for the dataset. 
-
-Part 2. In consideration of all the metrics we discussed what are a few key metrics that should be tracked given the question you are working to solve? 
-
-Part 3. Build a kNN model and evaluate the model using the metrics discussed in class (Accuracy, TPR, FPR, F1, Kappa, LogLoss and ROC/AUC). Make sure to calculate the baserate or prevalence to provide a reference for some of these measures. Even though you are generating many of the metrics we discussed, summarize the output of the key metrics you established in part 2. 
-
-Part 4.  Consider where miss-classification errors are occurring, is there a pattern? If so discuss this pattern and why you think this is the case. 
-
-Part 5. Based on your exploration in Part 3, change the threshold using the function provided in the in-class example, what differences do you see in the evaluation metrics? Speak specifically to the metrics that are best suited to address the question you are trying to answer. 
-
-Part 6. Summarize your findings focusing speaking through your question, what does the evaluation outputs mean when answering the question you've proposed?
-
-Recommendations for improvement might include gathering more data, adjusting the threshold, adding new features, changing your questions or maybe that it's working fine at the current level and nothing should be done. 
-
-Regardless of the outcome, what should we be aware of when your model is deployed (online versus offline)? 
-
-Submit a .Rmd file along with the data used or access to the data sources to the Collab site. You can work together with your groups but submit individually. 
 
 ```{r}
 library(tidyverse)
@@ -94,13 +63,13 @@ library(class)
 
 ```{r}
 heart_data <- read_csv("heart_failure_clinical_records_dataset.csv")
-(heart_data$age <- scale(heart_data["age"], center = TRUE, scale = TRUE))
-(heart_data$creatinine_phosphokinase <- scale(heart_data["creatinine_phosphokinase"], center = TRUE, scale = TRUE))
-(heart_data$ejection_fraction <- scale(heart_data["ejection_fraction"], center = TRUE, scale = TRUE))
-(heart_data$platelets <- scale(heart_data["platelets"], center = TRUE, scale = TRUE))
-(heart_data$serum_creatinine <- scale(heart_data["serum_creatinine"], center = TRUE, scale = TRUE))
-(heart_data$serum_sodium <- scale(heart_data["serum_sodium"], center = TRUE, scale = TRUE))
-(heart_data$time <- scale(heart_data["time"], center = TRUE, scale = TRUE))
+heart_data$age <- scale(heart_data["age"], center = TRUE, scale = TRUE)
+heart_data$creatinine_phosphokinase <- scale(heart_data["creatinine_phosphokinase"], center = TRUE, scale = TRUE)
+heart_data$ejection_fraction <- scale(heart_data["ejection_fraction"], center = TRUE, scale = TRUE)
+heart_data$platelets <- scale(heart_data["platelets"], center = TRUE, scale = TRUE)
+heart_data$serum_creatinine <- scale(heart_data["serum_creatinine"], center = TRUE, scale = TRUE)
+heart_data$serum_sodium <- scale(heart_data["serum_sodium"], center = TRUE, scale = TRUE)
+heart_data$time <- scale(heart_data["time"], center = TRUE, scale = TRUE)
 #View(heart_data)
 ```
 
@@ -116,18 +85,18 @@ part_index_1 <- createDataPartition(heart_data$`DEATH_EVENT`,
                                            groups=1,
                                            list=FALSE)
 #View(part_index_1)
-train <- heart_data[part_index_1,]
+train_heart <- heart_data[part_index_1,]
 tune_and_test <- heart_data[-part_index_1, ]
 #The we need to use the function again to create the tuning set 
 tune_and_test_index <- createDataPartition(tune_and_test$`DEATH_EVENT`,
                                            p = .5,
                                            list = FALSE,
                                            times = 1)
-tune <- tune_and_test[tune_and_test_index, ]
-test <- tune_and_test[-tune_and_test_index, ]
-dim(train)
-dim(tune)
-dim(test)
+tune_heart <- tune_and_test[tune_and_test_index, ]
+test_heart <- tune_and_test[-tune_and_test_index, ]
+dim(train_heart)
+dim(tune_heart)
+dim(test_heart)
 ```
 ## Train the classifier 
 
@@ -136,66 +105,64 @@ dim(test)
 # k-Nearest Neighbor is a randomized algorithm, so make sure to
 # use set.seed() to make your results repeatable.
 set.seed(1982)
-heart_3NN <-  knn(train = train[, c("age", "creatinine_phosphokinase", "ejection_fraction", "platelets", "serum_creatinine", "serum_sodium", "time", "sex", "high_blood_pressure", "diabetes", "sex", "smoking", "anaemia")],#<- training set cases
-               test = tune[, c("age", "creatinine_phosphokinase", "ejection_fraction", "platelets", "serum_creatinine", "serum_sodium", "time", "sex", "high_blood_pressure", "diabetes", "sex", "smoking", "anaemia")],    #<- test set cases
-               cl = train$`DEATH_EVENT`,#<- category for true classification
-               k = 3,#<- number of neighbors considered
-               use.all = TRUE,
-               prob = TRUE) #<- control ties between class assignments If true, all distances equal to the kth largest are included
-typeof(heart_3NN)
-#View(heart_3NN)
-# View the output.
-str(heart_3NN)
-table(heart_3NN)
-length(heart_3NN)
+
+trctrl <- trainControl(method = "repeatedcv",
+                       number = 10,
+                       repeats = 3) # generic control to pass back into the knn mode using the cross validation method. 
+
+death_knn <- train(as.factor(DEATH_EVENT)~.,
+                  data = train_heart[, c("age", "creatinine_phosphokinase", "ejection_fraction", "platelets", "serum_creatinine", "serum_sodium", "time", "high_blood_pressure", "diabetes", "sex", "smoking", "anaemia", "DEATH_EVENT")],
+                  method="knn",
+                  tuneLength=10,
+                  trControl= trctrl,#cv method above, will select the optimal K
+                  preProcess="scale") #already did this but helpful reference
+
+death_knn
 ```
-
-## Compare to the original data
-
-```{r}
-# How does the kNN classification compare to the true class?
-# Let's take a look at the confusion matrix by combining the 
-# predictions from heart_3NN to the original data set.
-kNN_res = table(heart_3NN,
-                tune$`DEATH_EVENT`)
-kNN_res
-sum(kNN_res)  #<- the total is all the test examples
-# Select the true positives and true negatives by selecting
-# only the cells where the row and column names are the same.
-kNN_res[row(kNN_res) == col(kNN_res)]
-# Calculate the accuracy rate by dividing the correct classifications
-# by the total number of classifications.
-kNN_acc = sum(kNN_res[row(kNN_res) == col(kNN_res)]) / sum(kNN_res)
-kNN_acc
-# An 87.0% accuracy rate is pretty good but keep in mind the baserate is roughly 89/11, so we have more or less a 90% chance of guessing right if we don't know anything about the customer, but the negative outcomes we don't really care about, this models value is being able to id sign ups when they are actually sign ups. This requires us to know are true positive rate, or Sensitivity or Recall. (Ya, that's annoying.) So let's dig a little deeper.    
-confusionMatrix(as.factor(heart_3NN), as.factor(tune$`DEATH_EVENT`), positive = "1", dnn=c("Prediction", "Actual"), mode = "sens_spec")
-#So our ability to "predict" sign up customers has more than doubled to 26% so that's  good but still pretty bad overall. This means that out of 10 sign ups, we really only classify 3 correctly. This is fairly typical when we have a unbalanced dataset. Which is why in this case we would want to tune this model on TPR (Sensitivity), to get it has high as possible while sacrificing Specificity or Precision.  Similar to a medical diagnosis example, where we would rather produce false positives as compared to false negatives, predict more of those with cancer that don't have it as compared to missing anyone that actually has cancer.      
-#Reference for confusion matrix: https://www.rdocumentation.org/packages/caret/versions/6.0-86/topics/confusionMatrix 
-```
-
 Now let's evaluate our model and replicate some of the evaluation metrics we've been discussing. 
 ```{r}
+#First we need to do some predictions using the test data 
 
-heart_eval_prob <- as.factor(heart_3NN)
-View(heart_eval_prob)
+death_eval <-(predict(death_knn,newdata = test_heart))#generates 1s and 0s
+
+View(death_eval)
+
+#predict is polymorphic, meaning it doesn't care about the type of model passed into it
+death_eval_prob <- predict(death_knn,newdata = test_heart, type = "prob")#this gives us the predicted prob, we will need these later for the fairness evaluation
+View(death_eval_prob)
+
+View(test_heart$DEATH_EVENT)
+table(death_eval, test_heart$DEATH_EVENT)#essential the confusion matrix, though we can make a fancy one using caret built in functions
+
+
+confusionMatrix(death_eval, as.factor(test_heart$DEATH_EVENT), positive = "1", dnn=c("Prediction", "Actual"), mode = "sens_spec")#change to everything
+
+#Quick function to explore various threshold levels and output a confusion matrix
 
 adjust_thres <- function(x, y, z) {
-  #x=pred_probablities, y=threshold, z=test_outcome
+  #x=pred_probablities, y=threshold, z=test_DEATH_EVENT
   thres <- as.factor(ifelse(x > y, 1,0))
   confusionMatrix(thres, z, positive = "1", dnn=c("Prediction", "Actual"), mode = "everything")
 }
-adjust_thres(heart_eval_prob$`1`,.60, test$outcome) #Not much changes here because of the high probability splits of the data outcomes. Let's take a closer look. We can see that the algo isn't marginally mis-classifying these rows, it's very confidently wrong. Which likely means that there's too much emphasis being placed on too small a number of variables, principally the funfetti variable. 
-heart_eval_prob$test <- test$outcome
-View(heart_eval_prob)
-(error = mean(heart_eval != test$outcome))#overall error rate, on average when does our prediction not match the actual, looks like around 15%, really just ok. 
+
+
+adjust_thres(death_eval_prob$`1`,.60, as.factor(test_heart$DEATH_EVENT)) #Not much changes here because of the high probability splits of the data DEATH_EVENTs. Let's take a closer look. We can see that the algo isn't marginally mis-classifying these rows, it's very confidently wrong. Which likely means that there's too much emphasis being placed on too small a number of variables, principally the funfetti variable. 
+
+death_eval_prob$test_heart <- as.factor(test_heart$DEATH_EVENT)
+
+#notice that this model is probably relying too much on a single variable (fun-fetti) b/c distribution of probabilities is so consistent (underfitting)
+View(death_eval_prob)
+
+(error = mean(death_eval != as.factor(test_heart$DEATH_EVENT)))#overall error rate, on average when does our prediction not match the actual, looks like around 15%, really just ok. 
+
 ```
 
 ROC/AUC
 ```{r}
 #In order to use most evaluation packages it's just easier to have are predictions and targets in one place. 
-heart_eval <- tibble(pred_class=heart_eval, pred_prob=heart_eval_prob$`1`,target=as.numeric(test$outcome))
-str(heart_eval)
-pred <- prediction(heart_eval$pred_prob,heart_eval$target)
+death_eval <- tibble(pred_class=death_eval, pred_prob=death_eval_prob$`1`,target=as.numeric(test_heart$DEATH_EVENT))
+str(death_eval)
+pred <- prediction(death_eval$pred_prob,death_eval$target)
 View(pred)
 tree_perf <- performance(pred,"tpr","fpr")
 plot(tree_perf, colorize=TRUE)
@@ -206,17 +173,17 @@ print(tree_perf_AUC@y.values)
 
 LogLoss
 ```{r}
-View(heart_eval)
-LogLoss(as.numeric(heart_eval$pred_prob), as.numeric(test$outcome))
+View(death_eval)
+LogLoss(as.numeric(death_eval$pred_prob), as.numeric(test_heart$DEATH_EVENT))
 #We want this number to be rather close to 0, so this is a pretty terrible result. 
 ```
 
 
 F1 Score 
 ```{r}
-pred_1 <- ifelse(heart_eval_prob$`1` < 0.5, 0, 1)
+pred_1 <- ifelse(death_eval_prob$`1` < 0.5, 0, 1)
 View(pred_1)
-F1_Score(y_pred = pred_1, y_true = heart_eval_prob$test, positive = "1")
+F1_Score(y_pred = pred_1, y_true = death_eval_prob$test_heart, positive = "1")
 ```
 
 
