@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 Throughout your early career as a data scientist you've built article summaries, 
@@ -40,7 +40,7 @@ library(psych)
 library(mltools)
 library(data.table)
 library(caret)
-
+library(class)
 ```
 
 ```{r}
@@ -60,7 +60,7 @@ heart_data <- read_csv("heart_failure_clinical_records_dataset.csv")
 
 (heart_data$time <- scale(heart_data["time"], center = TRUE, scale = TRUE))
 
-View(heart_data)
+#View(heart_data)
 
 
 
@@ -116,7 +116,8 @@ heart_3NN <-  knn(train = train[, c("age", "creatinine_phosphokinase", "ejection
                use.all = TRUE,
                prob = TRUE) #<- control ties between class assignments If true, all distances equal to the kth largest are included
 
-
+typeof(heart_3NN)
+#View(heart_3NN)
 
 # View the output.
 str(heart_3NN)
@@ -161,17 +162,27 @@ Now let's evaluate our model and replicate some of the evaluation metrics we've 
 ```{r}
 #First we need to do some predictions using the test data 
 
-heart_eval <-(predict(heart_3NN,newdata = test))#generates 1s and 0s
+#heart_eval <-(predict(heart_3NN,newdata = test))#generates 1s and 0s
+heart_eval_prob = heart_3NN
+heart_eval = heart_3NN
 
 
-heart_eval_prob <- predict(loan_tree,newdata = test, type = "prob")#this gives us the predicted prob, we will need these later for the fairness evaluation
-View(heart_eval_prob)
+#heart_eval_prob <- predict(loan_tree,newdata = test, type = "prob")#this gives us the predicted prob, we will need these later for the fairness evaluation
+#View(heart_eval_prob)
 
-View(test$outcome)
-table(heart_eval, test$outcome)#essential the confusion matrix, though we can make a fancy one using caret built in functions
+#View(test$`DEATH_EVENT`)
+heart_eval = as.factor(heart_eval[2:length(heart_eval)])
+table(heart_eval, test$`DEATH_EVENT`)#essential the confusion matrix, though we can make a fancy one using caret built in functions
 
+#length(heart_eval[2:length(heart_eval)])
+#length(test$`DEATH_EVENT`)
+str(heart_eval)
+#print(heart_eval)
+str(test$`DEATH_EVENT`)
 
-confusionMatrix(heart_eval, test$outcome, positive = "1", dnn=c("Prediction", "Actual"), mode = "sens_spec")#change to everything
+confusionMatrix(heart_eval[2:length(heart_eval)], test$`DEATH_EVENT`, positive = "1", dnn=c("Prediction", "Actual"), mode = "sens_spec")
+?confusionMatrix
+#change to everything
 
 #from the above we can see our True Positive Rate or sensitivity is quite good @ 88%, False Positive Rate (1-Specificity) is also not terrible ~ @ 27%, we want this to be low.(Subject to change) 
 
