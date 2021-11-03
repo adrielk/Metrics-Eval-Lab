@@ -29,21 +29,26 @@ Part 2. In consideration of all the metrics we discussed what are a few key metr
 ### Prevalence
   We should focus on prevalance so as to be able to accurately evaluate the performance of our model. We want to avoid the case where we think our model performs well, but our data only contains a small percentage of the positive class. 
 
-
 Part 3. Build a kNN model and evaluate the model using the metrics discussed in class (Accuracy, TPR, FPR, F1, Kappa, LogLoss and ROC/AUC). Make sure to calculate the baserate or prevalence to provide a reference for some of these measures. Even though you are generating many of the metrics we discussed, summarize the output of the key metrics you established in part 2. 
 
 Part 4.  Consider where miss-classification errors are occurring, is there a pattern? If so discuss this pattern and why you think this is the case. 
 
+  When miss-classfication occurs, our model tends to make the probability of the incorrect class very high. This is why the log-loss of our model is so high. This might be due to the use of binary variables when training our model.
 
 Part 5. Based on your exploration in Part 3, change the threshold using the function provided in the in-class example, what differences do you see in the evaluation metrics? Speak specifically to the metrics that are best suited to address the question you are trying to answer. 
 
-Part 6. Summarize your findings focusing speaking through your question, what does the evaluation outputs mean when answering the question you've proposed?
+  When making the threshold higher, the precision of the model increases. However, this reduces the recall/sensitivity of the model. Likewise, when the threshold is made lower, the model tends to predict the positive class more frequently. This increases recall/sensitivity but decreases precision. 
 
-Recommendations for improvement might include gathering more data, adjusting the threshold, adding new features, changing your questions or maybe that it's working fine at the current level and nothing should be done. 
+Part 6. Summarize your findings focusing on speaking through your question, what does the evaluation outputs mean when answering the question you've proposed?
 
-Regardless of the DEATH_EVENT, what should we be aware of when your model is deployed (online versus offline)? 
+  According to our experiments, we have determined that we can somewhat accurately predict whether or not a patient will die based off various attributes of that patient. The accuracy of the best k we had was 0.75. More work must be done to improve the recall of our model. The costs of false negatives is very high, since it can result in an unexpected death of a patient. To improve our model, we would recommend gathering more data, adjusting our thresholds, and conducting more research in the problem domain.
 
-Submit a .Rmd file along with the data used or access to the data sources to the Collab site. You can work together with your groups but submit individually. 
+Recommendations for improvement might include gathering more data, adjusting the threshold, adding new features, changing your questions or maybe that it's working fine at the current level and nothing should be done.
+
+Regardless of the outcome, what should we be aware of when your model is deployed (online versus offline)? 
+  
+  We should be aware of the fact that our model relies on a fixed set of data. New-incoming data can make the model useless or obsolete. we want to be able to actively monitor it so that we can make adjustments if necessary. 
+  
 
 ---
 title: "Eval_Lab"
